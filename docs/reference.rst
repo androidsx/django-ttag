@@ -22,7 +22,7 @@ Tag
     A representation of a template tag. For example::
 
 	    class Welcome(ttag.Tag):
-	
+
 	        def output(self, data):
 	            return "Hi there!"
 
@@ -65,7 +65,7 @@ output
 ------
 
 If your tag does not modify the output, override this method to change the
-output of this tag. 
+output of this tag.
 
 .. method:: Tag.output(data)
 
@@ -94,7 +94,7 @@ inside ``render``:
 .. method:: Tag.resolve(context)
 
 	Retrieve the values of the tag's arguments.
-	
+
 	:param context: The current template context.
 	:returns: A data dictionary containing the values of the tag's arguments.
 
@@ -122,7 +122,7 @@ argument in the tag below::
 Positional arguments
 --------------------
 
-By default, an argument is considered positional::  
+By default, an argument is considered positional::
 
     class Positional(ttag.Tag):
         first = ttag.Arg()
@@ -196,7 +196,7 @@ Arg
     :param required:
         Whether the argument is required as part of the tag definition in the
         template. Required positional arguments can not occur after optional
-        ones. 
+        ones.
 
         Defaults to ``True``.
 
@@ -226,7 +226,7 @@ Arg
 
     :param named:
         Make this a named argument, using an space to separate the argument
-        name from its value, for example, ``{% tag limit 10 %}``. 
+        name from its value, for example, ``{% tag limit 10 %}``.
 
         Defaults to ``False``.
 
@@ -324,7 +324,7 @@ Other Arguments
             def render(self, context):
                 data = self.resolve(data)
                 context[data['as']] = Users.objects.all()
-                return '' 
+                return ''
 
 
 .. class:: ConstantArg
@@ -362,7 +362,7 @@ Other Arguments
                 bits = []
                 default = data.get('default', '')
                 for bit in data['bits']:
-                    bits.append([force_unicode(bit) or default])
+                    bits.append([force_text(bit) or default])
                 return '.'.join(bits)
 
     This tag could be used like this::

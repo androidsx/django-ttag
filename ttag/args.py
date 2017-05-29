@@ -1,9 +1,17 @@
 import copy
 import datetime
 import re
-from django.template import TemplateSyntaxError, FilterExpression, Variable, \
-    VariableDoesNotExist
-from django.utils.encoding import force_unicode
+
+try:
+    from django.template.base import (
+        TemplateSyntaxError, FilterExpression, Variable, VariableDoesNotExist)
+except ImportError:  # Django <1.8
+    from django.template import (
+        TemplateSyntaxError, FilterExpression, Variable, VariableDoesNotExist)
+try:
+    from django.utils.encoding import force_text
+except ImportError:  # Django <1.8
+    from django.utils.encoding import force_unicode as force_text
 from ttag.exceptions import TagValidationError
 
 
@@ -49,7 +57,7 @@ class Arg(object):
 
         :param named:
             Make this a named argument, using an space to separate the argument
-            name from its value, for example, ``{% tag limit 10 %}``. 
+            name from its value, for example, ``{% tag limit 10 %}``.
 
             Defaults to ``False``.
 
@@ -118,7 +126,7 @@ class Arg(object):
     def is_token_named_arg(self, token, valid_named_args):
         """
         Check to see if the token is a valid named argument.
-        
+
         :param valid_named_args: List of valid arguments.
 
             Keyword named arguments must be in the format ``'name='`` so they
@@ -267,7 +275,7 @@ class StringArg(Arg):
         """
         Force to unicode.
         """
-        return force_unicode(value)
+        return force_text(value)
 
 
 class ConstantArg(BasicArg):

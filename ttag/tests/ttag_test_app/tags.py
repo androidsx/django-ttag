@@ -1,11 +1,13 @@
-from django import template
-from django.utils.encoding import force_unicode
+import six
+try:
+    from django.utils.encoding import force_text
+except ImportError:  # Django <1.8
+    from django.utils.encoding import force_unicode as force_text
 
 import ttag
 from ttag.core import BaseTag, DeclarativeArgsMetaclass
-from ttag.tests.setup import models
-
-register = template.Library()
+from ttag.tests.ttag_test_app import models
+from ttag.tests.ttag_test_app.templatetags.ttag_test import register
 
 
 class SelfRegisteringMetaclass(DeclarativeArgsMetaclass):
@@ -18,8 +20,9 @@ class SelfRegisteringMetaclass(DeclarativeArgsMetaclass):
         return cls
 
 
+@six.add_metaclass(SelfRegisteringMetaclass)
 class TestTag(BaseTag):
-    __metaclass__ = SelfRegisteringMetaclass
+    pass
 
 
 class NamedArg(TestTag):
@@ -63,7 +66,7 @@ class PositionalMixedkw(TestTag):
     default = ttag.Arg(keyword=True)
 
     def output(self, data):
-        return unicode(data.get('value') or data['default'])
+        return six.text_type(data.get('value') or data['default'])
 
 
 class PositionalOptional(TestTag):
@@ -102,7 +105,7 @@ class ArgumentType(TestTag):
 
     def output(self, data):
         order = 'name age url date time datetime'.split()
-        values = [unicode(data[x]) for x in order if x in data]
+        values = [six.text_type(data[x]) for x in order if x in data]
         if 'flag' in data:
             values.append('flag_is_set')
         return u' '.join(values)
@@ -129,7 +132,7 @@ class DotCombine(TestTag):
     args = ttag.MultiArg()
 
     def output(self, data):
-        args = [force_unicode(arg) for arg in data['args']]
+        args = [force_text(arg) for arg in data['args']]
         return '.'.join(args)
 
 
@@ -137,7 +140,7 @@ class DotCombineDefault(DotCombine):
     default = ttag.Arg(named=True)
 
     def output(self, data):
-        args = [arg and force_unicode(arg) or data['default']
+        args = [arg and force_text(arg) or data['default']
                 for arg in data['args']]
         return '.'.join(args)
 
@@ -186,7 +189,7 @@ class BaseInclude(TestTag):
     def output(self, data):
         out = 'including %s' % data['template']
         if data.get('with'):
-            with_bits = data['with'].items()
+            with_bits = list(data['with'].items())
             with_bits.sort(key=lambda bit: bit[0])
             out += ' with %s' % ' and '.join(['%s = %s' % (k, v)
                                               for k, v in with_bits])

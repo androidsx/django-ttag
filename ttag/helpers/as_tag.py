@@ -1,3 +1,4 @@
+import six
 from django import template
 
 from ttag import core, args
@@ -32,8 +33,8 @@ class AsTagMetaclass(core.DeclarativeArgsMetaclass):
     options_class = AsTagOptions
 
 
+@six.add_metaclass(AsTagMetaclass)
 class AsTag(core.BaseTag):
-    __metaclass__ = AsTagMetaclass
 
     def render(self, context):
         data = self.resolve(context)

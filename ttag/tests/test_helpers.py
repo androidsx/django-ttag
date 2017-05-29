@@ -1,18 +1,13 @@
-from os import path
 import datetime
 
 from django import template
-from django.conf import settings
 from django.test import TestCase
 
 import ttag
-from ttag.tests.setup import as_tags, template_tags
-
-template.add_to_builtins(as_tags.__name__)
-template.add_to_builtins(template_tags.__name__)
 
 
 def render(contents, extra_context=None):
+    contents = '{% load ttag_test %}' + contents
     return template.Template(contents).render(template.Context(extra_context))
 
 
@@ -63,13 +58,6 @@ class AsTag(TestCase):
 
 
 class TemplateTag(TestCase):
-
-    def setUp(self):
-        self.old_template_dirs = settings.TEMPLATE_DIRS
-        settings.TEMPLATE_DIRS = [path.join(path.dirname(__file__), 'templates')]
-
-    def tearDown(self):
-        settings.TEMPLATE_DIRS = self.old_template_dirs
 
     def test_simple(self):
         """

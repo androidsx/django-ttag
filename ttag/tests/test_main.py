@@ -1,15 +1,14 @@
 import datetime
 
+import six
 from django.test import TestCase
 from django import template
 
 import ttag
-from ttag.tests.setup import tags, models
-
-template.add_to_builtins(tags.__name__)
 
 
 def render(contents, extra_context=None):
+    contents = '{% load ttag_test %}' + contents
     return template.Template(contents).render(template.Context(extra_context))
 
 
@@ -20,6 +19,7 @@ class TagExecutionTests(TestCase):
         A tag with named arguments works with or without the argument as long
         as a default value is set.
         """
+        from ttag.tests.ttag_test_app import tags
         self.assertEqual(render('{% named_arg %}'),
                          'The limit is %d' %
                          tags.NamedArg._meta.args['limit'].default)
@@ -125,10 +125,11 @@ class PositionalTest(TestCase):
 class TestArgumentTypes(TestCase):
 
     def test_model_instance_arg(self):
+        from ttag.tests.ttag_test_app import models
         content = '{% argument_type url object %}'
         object = models.Link(url='http://bing.com')
         self.assertEqual(render(content, {'object': object}),
-                         unicode(object))
+                         six.text_type(object))
 
         self.assertRaises(ttag.TagValidationError, render, content,
                           {'object': int()})
@@ -166,12 +167,13 @@ class TestArgumentTypes(TestCase):
                          'Dave')
 
         # Values are cast to unicode.
+        @six.python_2_unicode_compatible
         class Name(object):
-            
+
             def __init__(self, name):
                 self.name = name
 
-            def __unicode__(self):
+            def __str__(self):
                 return self.name
 
         self.assertEqual(render('{% argument_type name dave %}',

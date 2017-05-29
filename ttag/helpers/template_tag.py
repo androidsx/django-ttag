@@ -1,3 +1,4 @@
+import six
 from django.template import TemplateSyntaxError
 from django.template.loader import render_to_string
 
@@ -25,13 +26,12 @@ class TemplateTagOptions(core.Options):
         self.named_args[self.template_name] = arg
 
 
-
 class TemplateTagMetaclass(core.DeclarativeArgsMetaclass):
     options_class = TemplateTagOptions
 
 
+@six.add_metaclass(TemplateTagMetaclass)
 class TemplateTag(core.BaseTag):
-    __metaclass__ = TemplateTagMetaclass
 
     def render(self, context):
         data = self.resolve(context)

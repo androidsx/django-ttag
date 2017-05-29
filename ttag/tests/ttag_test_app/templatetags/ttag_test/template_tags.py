@@ -1,10 +1,6 @@
 import datetime
 import ttag
 
-from django import template
-
-
-register = template.Library()
 
 class SelfReferentialTag(ttag.helpers.TemplateTag):
 
@@ -37,7 +33,3 @@ class Ask(SelfReferentialTag):
         if "date" in data['value']:
             return datetime.datetime.today()
 
-
-register.tag(Do)
-register.tag(Go)
-register.tag(Ask)

@@ -10,10 +10,15 @@ setup(
     author_email='chris@lincolnloop.com',
     license='MIT',
     url='http://github.com/lincolnloop/django-ttag',
+    install_requires=[
+        'six',
+    ],
     packages=[
         'ttag',
         'ttag.tests',
-        'ttag.tests.setup',
+        'ttag.tests.ttag_test_app',
+        'ttag.tests.ttag_test_app.templatetags',
+        'ttag.tests.ttag_test_app.templatetags.ttag_test',
         'ttag.helpers',
     ],
     classifiers=[

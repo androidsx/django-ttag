@@ -1,6 +1,9 @@
 import re
 
-from django.utils.encoding import force_unicode
+try:
+    from django.utils.encoding import force_text
+except ImportError:  # Django <1.8
+    from django.utils.encoding import force_unicode as force_text
 
 _split_single = r"""
     ([^\s",]*"(?:[^"\\]*(?:\\.[^"\\]*)*)"[^\s,]*|
@@ -15,7 +18,7 @@ CLASS_NAME_RE = re.compile(r'(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))')
 
 
 def smarter_split(input):
-    input = force_unicode(input)
+    input = force_text(input)
     for multi_match in _split_multi_re.finditer(input):
         hit = []
         for single_match in _split_single_re.finditer(multi_match.group(0)):

@@ -1,6 +1,8 @@
+import six
 from django import template
 
 from ttag import utils, args
+
 
 class Options(object):
 
@@ -67,7 +69,7 @@ class DeclarativeArgsMetaclass(type):
         name = opts.name
 
         all_args = [(arg_name.rstrip('_'), attrs.pop(arg_name))
-                    for arg_name, obj in attrs.items()
+                    for arg_name, obj in list(attrs.items())
                     if isinstance(obj, args.Arg)]
         all_args.sort(key=lambda x: x[1].creation_counter)
 
@@ -101,7 +103,7 @@ class DeclarativeArgsMetaclass(type):
                 opts.positional_args = base_opts.positional_args + \
                                                     opts.positional_args
             if hasattr(base_opts, 'named_args'):
-                for arg_name, arg in base_opts.named_args.iteritems():
+                for arg_name, arg in six.iteritems(base_opts.named_args):
                     if arg_name not in opts.named_args:
                         opts.named_args[arg_name] = arg
                         opts.parent_args.append(arg_name)
@@ -143,7 +145,7 @@ class BaseTag(template.Node):
                 current = parser.next_token().contents
                 if current == self._meta.end_block:
                     break
-            for name, required in other_blocks.iteritems():
+            for name, required in six.iteritems(other_blocks):
                 if name in nodelists:
                     continue
                 if required:
@@ -151,7 +153,7 @@ class BaseTag(template.Node):
                                                        name)
                 nodelists[name] = template.NodeList()
             self.child_nodelists = list(nodelists)
-            for attr, nodelist in nodelists.iteritems():
+            for attr, nodelist in six.iteritems(nodelists):
                 setattr(self, attr, nodelist)
 
     def _valid_named_args(self):
@@ -160,7 +162,7 @@ class BaseTag(template.Node):
         ``=`` so they can be checked for in :meth:`Arg.is_token_named_arg`.
         """
         return [arg.keyword and '%s=' % name or name
-                for name, arg in self._meta.named_args.iteritems()]
+                for name, arg in six.iteritems(self._meta.named_args)]
 
     def _process_positional_args(self, parser, tokens):
         named_args = self._valid_named_args()
@@ -209,7 +211,7 @@ class BaseTag(template.Node):
             self._vars[arg.name] = value
 
         # Handle missing items: required, default.
-        for arg_name, arg in self._meta.named_args.iteritems():
+        for arg_name, arg in six.iteritems(self._meta.named_args):
             if arg.name in self._vars:
                 continue
             if arg.default is not None:
@@ -251,7 +253,7 @@ class BaseTag(template.Node):
         3) The tag's ``.clean()`` method.
         """
         data = {}
-        for name, value in self._vars.iteritems():
+        for name, value in six.iteritems(self._vars):
             arg = self._meta.args[name]
             value = arg.resolve(value, context)
             value = arg.clean(value)
@@ -271,10 +273,11 @@ class BaseTag(template.Node):
         return data
 
 
+@six.add_metaclass(DeclarativeArgsMetaclass)
 class Tag(BaseTag):
     # This is a separate class from BaseTag in order to abstract the way
     # arguments are specified. This class (Tag) is the one that does the
     # fancy metaclass stuff purely for the semantic sugar -- it allows one
     # to define a tag using declarative syntax.
     # BaseTag itself has no way of designating arguments.
-    __metaclass__ = DeclarativeArgsMetaclass
+    pass
